@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADBench Leaderboard</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface2: #334155;
+            --border: #475569;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent2: #818cf8;
+            --gold: #fbbf24;
+            --silver: #cbd5e1;
+            --bronze: #f59e0b;
+            --green: #34d399;
+            --red: #f87171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 1rem 2rem;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1a1a2e 100%);
+            border-bottom: 1px solid var(--surface2);
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.6;
+        }
+
+        .hero .badge-row {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .controls label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .btn-group button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: var(--surface);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-group button:hover {
+            background: var(--surface2);
+        }
+
+        .btn-group button.active {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .btn-group button + button {
+            border-left: 1px solid var(--border);
+        }
+
+        .metric-toggle {
+            margin-left: auto;
+        }
+
+        .table-wrapper {
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--surface2);
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: var(--surface2);
+            padding: 0.85rem 1rem;
+            text-align: center;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        thead th:hover {
+            color: var(--accent);
+        }
+
+        thead th.sorted-asc::after { content: ' ▲'; color: var(--accent); }
+        thead th.sorted-desc::after { content: ' ▼'; color: var(--accent); }
+
+        thead th:first-child {
+            text-align: left;
+            width: 50px;
+        }
+
+        thead th:nth-child(2) {
+            text-align: left;
+        }
+
+        tbody tr {
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        tbody tr:not(:last-child) td {
+            border-bottom: 1px solid rgba(71, 85, 105, 0.4);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            text-align: center;
+            font-size: 0.92rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        td:first-child {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            width: 50px;
+        }
+
+        td:nth-child(2) {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .rank-1 { color: var(--gold); }
+        .rank-2 { color: var(--silver); }
+        .rank-3 { color: var(--bronze); }
+
+        .medal { font-size: 1.2rem; }
+
+        .model-name {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .model-tag {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag-proprietary {
+            background: rgba(129, 140, 248, 0.2);
+            color: var(--accent2);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+        }
+
+        .tag-open {
+            background: rgba(52, 211, 153, 0.2);
+            color: var(--green);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .score-cell {
+            position: relative;
+        }
+
+        .score-cell .bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            border-radius: 2px;
+            background: var(--accent);
+            opacity: 0.4;
+            transition: width 0.5s ease;
+        }
+
+        .best-score {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.8;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .last-updated {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .table-wrapper { overflow-x: auto; }
+            table { min-width: 800px; }
+            .controls { flex-direction: column; }
+            .metric-toggle { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>ADBench Leaderboard</h1>
+    <p class="subtitle">
+        A comprehensive benchmark for evaluating LLM-based agents on real-world advertising and marketing analytics tasks, with tiered difficulty and trajectory-based evaluation.
+    </p>
+    <div class="badge-row">
+        <span class="badge">📊 100 Tasks</span>
+        <span class="badge">🔧 11 Domain Tools</span>
+        <span class="badge">🏷️ 3 Difficulty Levels</span>
+        <span class="badge">🤖 10 Models Evaluated</span>
+    </div>
+</div>
+
+<div class="container">
+    <p class="last-updated">Last updated: February 2026</p>
+
+    <div class="controls">
+        <label>Difficulty:</label>
+        <div class="btn-group" id="levelFilter">
+            <button class="active" data-level="overall">Overall</button>
+            <button data-level="l1">L1 (Easy)</button>
+            <button data-level="l2">L2 (Medium)</button>
+            <button data-level="l3">L3 (Hard)</button>
+        </div>
+
+        <div class="metric-toggle">
+            <label>Metric:</label>
+            <div class="btn-group" id="metricFilter">
+                <button class="active" data-metric="pass3">Pass@3</button>
+                <button data-metric="pass1">Pass@1</button>
+                <button data-metric="both">Both</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="leaderboard">
+            <thead>
+                <tr id="headerRow"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="footer">
+    <p><strong>ADBench</strong> — Benchmarking LLM Agents for Advertising Analytics</p>
+    <p>If you find this benchmark useful, please cite our paper. <!-- <a href="#">[Paper]</a> <a href="#">[GitHub]</a> --></p>
+    <p>© 2026 ADBench Team</p>
+</div>
+
+<script>
+const MODELS = [
+    { name: "Gemini-3-Pro",  type: "proprietary", overall: [0.680, 0.830], l1: [0.778, 0.917], l2: [0.745, 0.915], l3: [0.494, 0.621] },
+    { name: "GPT-5.1",       type: "proprietary", overall: [0.647, 0.820], l1: [0.889, 0.958], l2: [0.667, 0.830], l3: [0.414, 0.690] },
+    { name: "HY-2.0",        type: "proprietary", overall: [0.657, 0.820], l1: [0.847, 0.875], l2: [0.702, 0.915], l3: [0.425, 0.621] },
+    { name: "o3",            type: "proprietary", overall: [0.690, 0.820], l1: [0.861, 0.917], l2: [0.759, 0.915], l3: [0.437, 0.586] },
+    { name: "GLM-4.7",       type: "proprietary", overall: [0.647, 0.810], l1: [0.722, 0.875], l2: [0.723, 0.915], l3: [0.460, 0.586] },
+    { name: "DeepSeek-V3",   type: "proprietary", overall: [0.683, 0.800], l1: [0.819, 0.875], l2: [0.745, 0.872], l3: [0.471, 0.621] },
+    { name: "Kimi-K2",       type: "proprietary", overall: [0.640, 0.790], l1: [0.833, 0.917], l2: [0.667, 0.851], l3: [0.437, 0.586] },
+    { name: "Qwen3-235B",    type: "open",        overall: [0.543, 0.680], l1: [0.792, 0.875], l2: [0.532, 0.723], l3: [0.356, 0.448] },
+    { name: "Qwen3-32B",     type: "open",        overall: [0.380, 0.590], l1: [0.500, 0.708], l2: [0.418, 0.638], l3: [0.218, 0.414] },
+    { name: "Qwen3-8B",      type: "open",        overall: [0.380, 0.580], l1: [0.514, 0.792], l2: [0.418, 0.617], l3: [0.207, 0.345] },
+];
+
+let currentLevel = 'overall';
+let currentMetric = 'pass3';
+let sortCol = null;
+let sortAsc = false;
+
+function getScores(model, level) {
+    return model[level]; // [pass1, pass3]
+}
+
+function getSortKey(model) {
+    const scores = getScores(model, currentLevel);
+    if (sortCol === 'pass1') return scores[0];
+    if (sortCol === 'pass3') return scores[1];
+    // Default: sort by pass3
+    return scores[1];
+}
+
+function render() {
+    const headerRow = document.getElementById('headerRow');
+    const tableBody = document.getElementById('tableBody');
+
+    // Determine columns
+    const showPass1 = currentMetric === 'pass1' || currentMetric === 'both';
+    const showPass3 = currentMetric === 'pass3' || currentMetric === 'both';
+
+    // Sort models
+    const defaultSort = sortCol || 'pass3';
+    const sorted = [...MODELS].sort((a, b) => {
+        const av = defaultSort === 'pass1' ? getScores(a, currentLevel)[0] : getScores(a, currentLevel)[1];
+        const bv = defaultSort === 'pass1' ? getScores(b, currentLevel)[0] : getScores(b, currentLevel)[1];
+        return sortAsc ? av - bv : bv - av;
+    });
+
+    // Find best scores
+    const bestPass1 = Math.max(...MODELS.map(m => getScores(m, currentLevel)[0]));
+    const bestPass3 = Math.max(...MODELS.map(m => getScores(m, currentLevel)[1]));
+
+    // Build header
+    let headerHTML = '<th>#</th><th>Model</th>';
+    if (showPass1) headerHTML += `<th class="${sortCol === 'pass1' ? (sortAsc ? 'sorted-asc' : 'sorted-desc') : ''}" data-sort="pass1">Pass@1</th>`;
+    if (showPass3) headerHTML += `<th class="${sortCol === 'pass3' ? (sortAsc ? 'sorted-asc' : 'sorted-desc') : ''}" data-sort="pass3">Pass@3</th>`;
+    headerRow.innerHTML = headerHTML;
+
+    // Build body
+    let bodyHTML = '';
+    sorted.forEach((model, i) => {
+        const rank = i + 1;
+        const scores = getScores(model, currentLevel);
+        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+        const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+        const tagClass = model.type === 'proprietary' ? 'tag-proprietary' : 'tag-open';
+        const tagLabel = model.type === 'proprietary' ? 'Proprietary' : 'Open';
+
+        bodyHTML += `<tr>`;
+        bodyHTML += `<td class="${rankClass}">${rank <= 3 ? `<span class="medal">${medal}</span>` : rank}</td>`;
+        bodyHTML += `<td><div class="model-name">${model.name} <span class="model-tag ${tagClass}">${tagLabel}</span></div></td>`;
+
+        if (showPass1) {
+            const pct = (scores[0] / 1.0) * 100;
+            const isBest = scores[0] === bestPass1;
+            bodyHTML += `<td class="score-cell ${isBest ? 'best-score' : ''}">${(scores[0] * 100).toFixed(1)}%<div class="bar" style="width:${pct}%"></div></td>`;
+        }
+        if (showPass3) {
+            const pct = (scores[1] / 1.0) * 100;
+            const isBest = scores[1] === bestPass3;
+            bodyHTML += `<td class="score-cell ${isBest ? 'best-score' : ''}">${(scores[1] * 100).toFixed(1)}%<div class="bar" style="width:${pct}%"></div></td>`;
+        }
+
+        bodyHTML += `</tr>`;
+    });
+    tableBody.innerHTML = bodyHTML;
+}
+
+// Level filter
+document.getElementById('levelFilter').addEventListener('click', e => {
+    if (e.target.tagName !== 'BUTTON') return;
+    document.querySelectorAll('#levelFilter button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentLevel = e.target.dataset.level;
+    sortCol = null;
+    render();
+});
+
+// Metric filter
+document.getElementById('metricFilter').addEventListener('click', e => {
+    if (e.target.tagName !== 'BUTTON') return;
+    document.querySelectorAll('#metricFilter button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentMetric = e.target.dataset.metric;
+    sortCol = null;
+    render();
+});
+
+// Column sort
+document.getElementById('leaderboard').addEventListener('click', e => {
+    const th = e.target.closest('th[data-sort]');
+    if (!th) return;
+    const col = th.dataset.sort;
+    if (sortCol === col) {
+        sortAsc = !sortAsc;
+    } else {
+        sortCol = col;
+        sortAsc = false;
+    }
+    render();
+});
+
+// Initial render
+render();
+</script>
+
+</body>
+</html>
