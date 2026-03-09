@@ -96,8 +96,4 @@ Due to privacy-sensitive information in the benchmark queries, the dataset is **
 1. Public model endpoint (API or HuggingFace repo)
 2. Model card / technical spec (I/O format, context window, etc.)
 
-**How to Submit**:
-- Email: [lingxianghu@tencent.com](mailto:lingxianghu@tencent.com)
-- Subject: `[ADBench Eval Request] <Institution / Model Name>`
-
 **Turnaround**: We will schedule the evaluation and send a full report within **14 business days**.
